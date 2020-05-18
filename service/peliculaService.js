@@ -5,8 +5,8 @@ const service = {};
 module.exports.init = (dbConnection) => {
     const repository = peliculaRepository.init(dbConnection);
 
-    service.getAllPelis = () => repository.getAll()
-        .then((data) => { return data })
+    service.getAllPelis = (competencia) => repository.getAll(competencia)
+        .then((peliculas) => { return peliculas })
         .catch((err) => {return err});
 
     return service;

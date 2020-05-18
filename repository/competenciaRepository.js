@@ -8,7 +8,7 @@ module.exports.init = (dbConnection) => {
     repository.getAll = () => {
         return new Promise((resolve, reject) => {
             conn.query('SELECT id, nombre FROM competencias', (err,results) => {
-                if(err) return reject(error);
+                if(err) return reject(err);
                 resolve(results);
             });
         });
@@ -16,11 +16,36 @@ module.exports.init = (dbConnection) => {
 
     repository.getById = (id) => {
         return new Promise((resolve, reject) => {
-            conn.query('SELECT id, nombre FROM competencias WHERE id = ?',[id], (err,results) => {
+            conn.query('SELECT id, nombre, directorId, actorId, generoId FROM competencias WHERE id = ?',[id], (err,results) => {
                 if(err) return reject(err);
-                console.log(results);
-                if(results.length > 0) return resolve(new competencia(results[0].id, results[0].nombre));
+                if(results.length > 0) return resolve(new competencia(results[0].id, 
+                                                                        results[0].nombre,
+                                                                        results[0].generoId,
+                                                                        results[0].actorId,
+                                                                        results[0].directorId));
                 reject('No existe la competencia');
+            });
+        });
+    };
+
+    repository.createCompetencia = (competencia) => {
+        console.log(competencia);
+        return new Promise((resolve, reject) => {
+            conn.query('INSERT INTO competencias SET ?',{nombre: competencia.nombre,
+                                                         generoId: competencia.genero == 0 ? null: competencia.genero,
+                                                         directorId: competencia.director == 0 ? null : competencia.director,
+                                                         actorId: competencia.actor == 0 ? null : competencia.actor}, (err,results) => {
+                if(err) return reject(err);
+                resolve(results);
+            });
+        });
+    };
+
+    repository.reiniciarVotos = (idCompetencia) => {
+        return new Promise((resolve, reject) => {
+            conn.query('DELETE FROM votos WHERE competenciasId =  ?',[idCompetencia], (err,results) => {
+                if(err) return reject(err);
+                resolve(results);
             });
         });
     };
