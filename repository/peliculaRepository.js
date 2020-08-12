@@ -10,9 +10,9 @@ module.exports.init = (dbConnection) => {
 
         if (where) {
             if (competencia.actor)
-                where = ' AND ap.id = ' + competencia.actor;
+                where = ' AND ap.actor_id = ' + competencia.actor;
         } else if (competencia.actor) {
-            where = 'WHERE ap.id = ' + competencia.actor;
+            where = 'WHERE ap.actor_id = ' + competencia.actor;
         }
 
         if (where) {

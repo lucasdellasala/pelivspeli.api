@@ -28,7 +28,14 @@ module.exports.init = (dbConnection) => {
     service.reiniciarVotos = (idCompetencia) => repository.reiniciarVotos(idCompetencia)
         .then((data) => { return data })
         .catch((err) => {console.log(err); throw err});        
-        
+    
+    service.borrarCompetencia = (idCompetencia) => repository.borrarCompetencia(idCompetencia)
+    .then((data) => { return data })
+    .catch((err) => {console.log(err); throw err});   
+
+    service.editarNombre = (nombre, idCompetencia) => repository.editarNombre(nombre, idCompetencia)
+    .then((data) => { return data })
+    .catch((err) => {console.log(err); throw err});   
 
     return service;
 }

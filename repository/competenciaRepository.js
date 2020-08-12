@@ -16,6 +16,7 @@ module.exports.init = (dbConnection) => {
 
     repository.getById = (id) => {
         return new Promise((resolve, reject) => {
+            //
             conn.query('SELECT id, nombre, directorId, actorId, generoId FROM competencias WHERE id = ?',[id], (err,results) => {
                 if(err) return reject(err);
                 if(results.length > 0) return resolve(new competencia(results[0].id, 
@@ -23,7 +24,7 @@ module.exports.init = (dbConnection) => {
                                                                         results[0].generoId,
                                                                         results[0].actorId,
                                                                         results[0].directorId));
-                reject('No existe la competencia');
+                reject(err);
             });
         });
     };
@@ -43,7 +44,7 @@ module.exports.init = (dbConnection) => {
 
     repository.reiniciarVotos = (idCompetencia) => {
         return new Promise((resolve, reject) => {
-            conn.query('DELETE FROM votos WHERE competenciasId =  ?',[idCompetencia], (err,results) => {
+            conn.query('DELETE FROM votos WHERE competencia_Id =  ?',[idCompetencia], (err,results) => {
                 if(err) return reject(err);
                 resolve(results);
             });
@@ -52,7 +53,7 @@ module.exports.init = (dbConnection) => {
 
     repository.votarPelicula = (idCompetencia, idPelicula) => {
         return new Promise((resolve, reject) => {
-            conn.query('INSERT INTO votos SET ?',{peliculasId: idPelicula, competenciasId: idCompetencia }, (err,results) => {
+            conn.query('INSERT INTO votos SET ?',{pelicula_Id: idPelicula, competencia_Id: idCompetencia }, (err,results) => {
                 if(err) return reject(err);
                 resolve(results);
             });
@@ -63,15 +64,15 @@ module.exports.init = (dbConnection) => {
         return new Promise((resolve, reject) => {
             conn.query('SELECT ' + 
                        'compe.nombre as competencia,' +
-                       'count(peliculasId) as votos,' +
+                       'count(pelicula_Id) as votos,' +
                        'peli.titulo,' +
                        'peli.poster,' +
                        'peli.id as pelicula_id ' +
                        'FROM votos vot ' +
-                       'LEFT JOIN pelicula peli ON peli.id = vot.peliculasId ' +
-                       'LEFT JOIN competencias compe ON compe.id = vot.competenciasid ' +
-                       'WHERE competenciasId = ? ' +
-                       'GROUP BY peliculasId ' + 
+                       'LEFT JOIN pelicula peli ON peli.id = vot.pelicula_Id ' +
+                       'LEFT JOIN competencias compe ON compe.id = vot.competencia_Id ' +
+                       'WHERE competencia_Id = ? ' +
+                       'GROUP BY pelicula_Id ' + 
                        'ORDER BY votos desc ' +
                        'LIMIT 3'
                        ,[idCompetencia], (err,results) => {
@@ -86,6 +87,30 @@ module.exports.init = (dbConnection) => {
             });
         });
     };
+
+    repository.borrarCompetencia = (idCompetencia) => {
+        return new Promise((resolve, reject) => {
+            conn.query('DELETE FROM competencias WHERE id =  ?',[idCompetencia], (err,results) => {
+                if(err) return reject(err);
+                resolve(results);
+            });
+            conn.query('DELETE FROM votos WHERE competencia_id = ?',[idCompetencia], (err,results) => {
+                if(err) return reject(err);
+                resolve(results);
+            });
+        });
+    };
+
+    repository.editarNombre = (nombre, idCompetencia) => {
+        return new Promise((resolve, reject) => {
+            conn.query('UPDATE competencias SET nombre = ? WHERE id = ?',[nombre, idCompetencia], (err,results) => {
+                if(err) return reject(err);
+                resolve(results);
+            });
+        });
+    };
+
+
 
     return repository;
 }
