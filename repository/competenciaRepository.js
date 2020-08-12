@@ -30,15 +30,80 @@ module.exports.init = (dbConnection) => {
     };
 
     repository.createCompetencia = (competencia) => {
-        console.log(competencia);
+
+        const genero_id = competencia.genero == 0 ? null: competencia.genero;
+        const director_id = competencia.director == 0 ? null : competencia.director;
+        const actor_id = competencia.actor == 0 ? null : competencia.actor;
+
+                                            
+                                              
+        //Armando query de verificacion                                      
+
+        let queryDeVerificacion = "SELECT * FROM pelicula p ";
+        let flag = false;
+        if (actor_id != null){
+            queryDeVerificacion = queryDeVerificacion + "JOIN actor_pelicula ap on p.id = ap.pelicula_id "
+        };
+        if (director_id != null){
+            queryDeVerificacion = queryDeVerificacion + "JOIN director_pelicula dp on p.id = dp.pelicula_id "
+        };
+        if (actor_id != null){
+            queryDeVerificacion = queryDeVerificacion + "WHERE ap.actor_id = ? ";
+            flag = true;
+        } 
+        if (director_id != null){
+            if (flag == false){
+                queryDeVerificacion = queryDeVerificacion + "WHERE dp.director_id = ? ";
+            } else {
+                queryDeVerificacion = queryDeVerificacion + "AND dp.director_id = ?";
+                flag = true;
+            }
+        };
+        if (genero_id != null){
+            if(flag == false){
+                queryDeVerificacion = queryDeVerificacion + "WHERE p.genero_id = ?";
+            } else {
+                queryDeVerificacion = queryDeVerificacion + "AND p.genero_id = ?";
+                flag = true;
+            }
+        }
+
+
+        //Armando valores de la query
+
+        let values = [];
+
+        if (actor_id != null){
+            values.push(actor_id);
+        };
+        if (director_id != null){
+            values.push(director_id);
+        }; 
+        if (genero_id != null){
+            values.push(genero_id);
+        };
+
+
+
         return new Promise((resolve, reject) => {
-            conn.query('INSERT INTO competencias SET ?',{nombre: competencia.nombre,
-                                                         generoId: competencia.genero == 0 ? null: competencia.genero,
-                                                         directorId: competencia.director == 0 ? null : competencia.director,
-                                                         actorId: competencia.actor == 0 ? null : competencia.actor}, (err,results) => {
-                if(err) return reject(err);
-                resolve(results);
-            });
+             conn.query(queryDeVerificacion, values, (err,results) => {
+                //Verificacion
+                if (results.length < 2){
+                    return reject(err);
+                }
+                resolve(
+                    conn.query('INSERT INTO competencias SET ?',{nombre: competencia.nombre,
+                        generoId: genero_id,
+                        directorId: director_id,
+                        actorId: actor_id}, (err,results) => {
+                        if(err) return reject(err);
+                        resolve(results);
+                        })
+                );
+                });
+            
+            
+           
         });
     };
 
@@ -82,7 +147,6 @@ module.exports.init = (dbConnection) => {
 
                 if (results.length > 0)
                     results.forEach(element => resultados.push(new resultado(element.pelicula_id, element.poster, element.titulo, element.votos)));
-                console.log({competencia:results[0].competencia, resultados});
                 resolve({competencia:results[0].competencia, resultados});
             });
         });

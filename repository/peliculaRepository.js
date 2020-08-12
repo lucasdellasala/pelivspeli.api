@@ -32,8 +32,6 @@ module.exports.init = (dbConnection) => {
         where +
         ' ORDER BY RAND() LIMIT 2';
 
-        console.log(query);
-
         return new Promise((resolve, reject) => {
             conn.query(query,
                         (err,results) => {

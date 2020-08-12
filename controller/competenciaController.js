@@ -20,7 +20,7 @@ module.exports.init = (dbConnection) => {
 
     compService.createCompetencia(comp)
     .then(data => res.status(200).json(data))
-    .catch(err => res.status(422).send('Error'))
+    .catch(err => res.status(422).send('Error, existen menos de dos peliculas para esa categoría'))
 
   });
 
@@ -39,9 +39,7 @@ module.exports.init = (dbConnection) => {
   router.get('/:id/peliculas', (req, res, next) => {
     compService.getCompetenciaById(req.params.id)
     .then((competencia) => {
-      console.log(competencia);
       peliService.getAllPelis(competencia).then((peliculas) => {
-        console.log(peliculas);
         res.status(200).json({competencia: competencia.nombre, peliculas: peliculas})
       })
     }).catch(err => res.status(404).send(err));
